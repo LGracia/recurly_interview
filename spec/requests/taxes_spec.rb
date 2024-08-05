@@ -5,21 +5,21 @@ RSpec.describe "Taxes", type: :request do
     context "when Australian number" do
       context "with a valid input string unformatted" do
         it "returns the transformed string" do
-          get '/transform', params: { identification_number: '12345678912', country_code: 'AU' }
+          get '/transform', params: { identification_number: '51824753556', country_code: 'AU' }
 
           expect(response).to have_http_status(:ok)
           expect(response.content_type).to include('application/json')
-          expect(JSON.parse(response.body)['formatted_tin']).to eq('12 345 678 912')
+          expect(JSON.parse(response.body)['formatted_tin']).to eq('51 824 753 556')
         end
       end
 
       context "with a valid input string formatted" do
         it "returns the transformed string" do
-          get '/transform', params: { identification_number: '12 345 678 912', country_code: 'AU' }
+          get '/transform', params: { identification_number: '51 824 753 556', country_code: 'AU' }
 
           expect(response).to have_http_status(:ok)
           expect(response.content_type).to include('application/json')
-          expect(JSON.parse(response.body)['formatted_tin']).to eq('12 345 678 912')
+          expect(JSON.parse(response.body)['formatted_tin']).to eq('51 824 753 556')
         end
       end
 

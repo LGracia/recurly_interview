@@ -9,6 +9,7 @@ class TaxIdentificationNumberServices
         tin_name: 'Australian Business Number',
         length_validation: -> (str) { str.tr(' ', '').size == 11 },
         regex: -> (str) { str.match?(/^\d{2} \d{3} \d{3} \d{3}$/) },
+        algorithm: AustralianAlgorithmServices,
         format: -> (str) { "#{str[0..1]} #{str[2..4]} #{str[5..7]} #{str[8..10]}" }
       },
       {
@@ -44,6 +45,7 @@ class TaxIdentificationNumberServices
 
   class CountryCodeNotFoundException < StandardError; end
   class InvalidParametersException < StandardError; end
+  class InvalidIdentificationNumber < StandardError ; end
 
   def initialize(country_code:, identification_number:)
     @country_code = country_code
@@ -55,11 +57,18 @@ class TaxIdentificationNumberServices
   def perform
     raise InvalidParametersException.new("Missing parameters") unless @identification_number && @country_code
 
-    @formatted_identification = @identification_number if @country_code_information[:regex].call(@identification_number)
+    @formatted_identification =
+      if @country_code_information[:regex].call(@identification_number)
+        @identification_number
+      else
+        @country_code_information[:format].call(@identification_number)
+      end
 
-    return if @formatted_identification 
+      algorithm = @country_code_information[:algorithm]&.new(identification_number: @identification_number)
 
-    @formatted_identification = @country_code_information[:format].call(@identification_number)
+      return unless algorithm
+
+      raise InvalidIdentificationNumber.new('Indentification number is not valid') unless algorithm.valid?
   end
 
   def generate_response
