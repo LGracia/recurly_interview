@@ -87,5 +87,31 @@ RSpec.describe "Taxes", type: :request do
         end
       end
     end
+
+    context "when identification_number not sent" do
+      it "returns the transformed string" do
+        get '/transform', params: { country_code: 'AU' }
+
+        parsed_response = JSON.parse(response.body)
+
+        expect(response).to have_http_status(:bad_request)
+        expect(response.content_type).to include('application/json')
+        expect(parsed_response['errors']).to include('TaxIdentificationNumberServices::InvalidParametersException')
+        expect(parsed_response['valid']).to be_falsey
+      end
+    end
+
+    context "when identification_number not country_code" do
+      it "returns the transformed string" do
+        get '/transform', params: { identification_number: '51824753556' }
+
+        parsed_response = JSON.parse(response.body)
+
+        expect(response).to have_http_status(:bad_request)
+        expect(response.content_type).to include('application/json')
+        expect(parsed_response['errors']).to include('TaxIdentificationNumberServices::InvalidParametersException')
+        expect(parsed_response['valid']).to be_falsey
+      end
+    end
   end
 end

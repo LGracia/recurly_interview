@@ -51,12 +51,12 @@ class TaxIdentificationNumberServices
     @country_code = country_code
     @identification_number = identification_number
 
+    raise InvalidParametersException.new("Missing parameters") unless @identification_number && @country_code
+
     country_code_information
   end
 
   def perform
-    raise InvalidParametersException.new("Missing parameters") unless @identification_number && @country_code
-
     @formatted_identification =
       if @country_code_information[:regex].call(@identification_number)
         @identification_number
